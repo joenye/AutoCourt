@@ -19,15 +19,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+
+import static spark.Spark.get;
+
 
 public class Main {
 
@@ -63,13 +63,25 @@ public class Main {
         prop.load(input);
         input.close();
 
-        if (args.length > 0)
-            liveMode = Boolean.parseBoolean(args[0]);
-        if (!liveMode) {
-            logger.warn("Live mode is not enabled. Bookings will not be confirmed.");
+        if (args.length > 0) {
+            logger.warn("CAUTION: Live mode is enabled. Bookings will be confirmed and " +
+                    "real money shall be spent.");
+            liveMode = (Objects.equals(args[0].toLowerCase(), "--live"));
         }
-
+        if (!liveMode) {
+            logger.info("Live mode is not enabled. Bookings will not be confirmed.");
+        }
         saveFilePath = prop.getProperty("SAVE_FILE_PATH");
+
+
+        // Configure HTTP endpoints
+        LocalDateTime time = LocalDateTime.parse("2017-09-25 07:00", Booking.formatter);
+        Booking exampleBooking = new Booking(false, "3473", time, 1);
+        get("/add", (req, res) -> {
+            addBooking(exampleBooking);
+            return "Added booking";
+        });
+
 
         // Load active bookings
         List<Booking> bookings = FileUtils.loadBookingsFromFile(saveFilePath);
@@ -89,13 +101,20 @@ public class Main {
             Runnable task = () -> bookCourt(booking);
             ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
 
+            logger.info("New booking added to active bookings: " + booking.toString());
+            if (LocalDateTime.now().until(schedulingTime.minusSeconds(0), ChronoUnit.SECONDS) < 0) {
+                logger.warn("This booking can already be made online. Booking" +
+                        " has not been added to scheduler.");
+                return;
+            }
+
             ScheduledFuture bookingFuture = execService.schedule(task, LocalDateTime.now()
-                    .until(schedulingTime.minusSeconds(5), ChronoUnit.SECONDS), TimeUnit
+                    .until(schedulingTime.minusSeconds(0), ChronoUnit.SECONDS), TimeUnit
                     .SECONDS);
             activeBookings.put(booking, bookingFuture);
             logger.info(booking.toString() + " has been scheduled to run at " + Booking
                     .long_formatter
-                    .format(schedulingTime.minusSeconds(5)));
+                    .format(schedulingTime.plusSeconds(1)));
             FileUtils.saveBookingsToFile(activeBookings, saveFilePath);
         }
     }
@@ -104,7 +123,8 @@ public class Main {
         ScheduledFuture future = activeBookings.get(booking);
         future.cancel(true);
         activeBookings.remove(booking);
-        FileUtils.saveBookingsToFile(activeBookings, saveFilePath);
+        if (activeBookings.size() > 0)
+            FileUtils.saveBookingsToFile(activeBookings, saveFilePath);
     }
 
     private static void login() {
@@ -122,11 +142,14 @@ public class Main {
     }
 
     private static void bookCourt(Booking booking) {
-        logger.info("Booking court for " + booking.getDuration() + " hour(s), from time " +
+        logger.info("Attempting to book court for " + booking.getDuration() + " hour" +
+                "(s) from " +
+                " " +
                 Booking.formatter.format(booking.getStartTime()));
 
         activeBookings.remove(booking);
-        FileUtils.saveBookingsToFile(activeBookings, saveFilePath);
+        if (activeBookings.size() > 0)
+            FileUtils.saveBookingsToFile(activeBookings, saveFilePath);
 
         String URL = "https://www.openplay.co" +
                 ".uk/booking/place/" + booking.getLocationId() +
