@@ -28,7 +28,6 @@ import java.util.function.Function;
 
 import static spark.Spark.get;
 
-
 public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
