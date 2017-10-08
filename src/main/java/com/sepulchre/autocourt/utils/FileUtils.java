@@ -1,8 +1,6 @@
 package com.sepulchre.autocourt.utils;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sepulchre.autocourt.model.Booking;
@@ -11,16 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
 
 public class FileUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
-    public static void saveBookingsToFile(Map<Booking, ScheduledFuture> bookings,
+    public static void saveBookingsToFile(List<Booking> bookings,
                                           String filePath) {
         // Delete existing file
         File file = new File(filePath);
@@ -29,12 +24,10 @@ public class FileUtils {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         try {
-            List<Booking> bookingsList = new ArrayList<>();
-            bookingsList.addAll(bookings.keySet());
             mapper.writerWithDefaultPrettyPrinter().writeValue(new File(filePath),
-                    bookingsList);
+                    bookings);
             logger.info("Wrote " + bookings.size() + " bookings to save file: " +
-                    bookingsList.toString());
+                    bookings.toString());
 
         } catch (IOException e) {
             e.printStackTrace();

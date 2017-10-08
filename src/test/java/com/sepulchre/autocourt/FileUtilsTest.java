@@ -40,14 +40,14 @@ public class FileUtilsTest {
     public void testSaveAndLoadBookingsToAndFromFile() {
 
         // Save bookings
-        Booking booking1 = new Booking(true, "1000", LocalDateTime.now(), 1);
-        Booking booking2 = new Booking(false, "500", LocalDateTime.now().plusDays(1), 2);
+        Booking booking1 = new Booking(true, Booking.Location.ASKE_GARDENS, LocalDateTime.now(), 1);
+        Booking booking2 = new Booking(false, Booking.Location.ASKE_GARDENS, LocalDateTime.now().plusDays(1), 2);
         Map<Booking, ScheduledFuture> bookingsToSave = new LinkedHashMap<>();
 
         bookingsToSave.put(booking1, null);
         bookingsToSave.put(booking2, null);
 
-        FileUtils.saveBookingsToFile(bookingsToSave, saveFilePath);
+        FileUtils.saveBookingsToFile(new ArrayList<>(bookingsToSave.keySet()), saveFilePath);
 
         // Load bookings
         List<Booking> bookingsToLoad = FileUtils.loadBookingsFromFile(saveFilePath);
@@ -57,13 +57,13 @@ public class FileUtilsTest {
         assertTrue(bookingsToLoad.size() == 2);
 
         assertTrue(bookingsToLoad.get(0).isRecurrent());
-        assertTrue(Objects.equals(bookingsToLoad.get(0).getLocationId(), "1000"));
+        assertTrue(Objects.equals(bookingsToLoad.get(0).getLocation(), Booking.Location.ASKE_GARDENS));
         assertTrue(bookingsToLoad.get(0).getStartTime().getDayOfYear() ==
                 LocalDateTime.now().getDayOfYear());
         assertTrue(bookingsToLoad.get(0).getDuration() == 1);
 
         assertTrue(!bookingsToLoad.get(1).isRecurrent());
-        assertTrue(Objects.equals(bookingsToLoad.get(1).getLocationId(), "500"));
+        assertTrue(Objects.equals(bookingsToLoad.get(1).getLocation(), Booking.Location.ASKE_GARDENS));
         assertTrue(bookingsToLoad.get(1).getStartTime().getDayOfYear() ==
                 LocalDateTime.now().plusDays(1).getDayOfYear());
         assertTrue(bookingsToLoad.get(1).getDuration() == 2);
