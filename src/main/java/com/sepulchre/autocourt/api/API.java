@@ -27,6 +27,7 @@ public class API {
         ThymeleafTemplateEngine engine = new ThymeleafTemplateEngine();
         addJava8Dialect(engine);
         staticFiles.location("/public");
+        port(getAssignedPort());
 
         get("/", (req, res) -> {
             res.redirect("/bookings");
@@ -71,6 +72,14 @@ public class API {
             res.redirect("/bookings");
             return "Added booking: " + booking.toString();
         });
+    }
+
+    private static int getAssignedPort() {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        if (processBuilder.environment().get("PORT") != null) {
+            return Integer.parseInt(processBuilder.environment().get("PORT"));
+        }
+        return 4567; //return default port if heroku-port isn't set (i.e. on localhost)
     }
 
     private static void addJava8Dialect(ThymeleafTemplateEngine engine) {

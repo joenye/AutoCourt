@@ -10,7 +10,7 @@ Automatic tennis court booking system for Hackney Tennis Courts.
 
 Optional parameters:
 
-* Enable live mode (bookings will be confirmed): `--livemode`
+* Enable live mode (bookings will be confirmed): `--live`
 * Enable Chrome headless mode: `--headless`
 
 For example, `java -jar target/AutoCourt-1.0.jar --headless`
