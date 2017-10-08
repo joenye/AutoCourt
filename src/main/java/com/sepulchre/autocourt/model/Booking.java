@@ -4,33 +4,60 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Booking implements Serializable {
 
+    private UUID id;
     private boolean isRecurrent;
-    private String locationId;
+    private Location location;
     private LocalDateTime startTime;
     private int duration;
 
-    public static DateTimeFormatter url_formatter = DateTimeFormatter.ofPattern(
+    public enum Location {
+        CLISSOLD_PARK("3473"),
+        ASKE_GARDENS("3638");
+
+        public String id;
+
+        Location(String id) {
+            this.id = id;
+        }
+
+        public static Location getById(String id) {
+            for (Location l : values()) {
+                if (l.id.equals(id)) return l;
+            }
+            return null;
+        }
+    }
+
+    public static final DateTimeFormatter CLISSOLD_URL_FORMATTER = DateTimeFormatter.ofPattern(
             "yyyy-MM-dd");
 
-    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-            "yyyy-MM-dd H:mm");// e.g. 2017-09-23-24-00
-
-    public static DateTimeFormatter long_formatter = DateTimeFormatter.ofPattern(
-            "yyyy-MM-dd H:mm:ss");
+    public static final DateTimeFormatter API_URL_FORMATTER = DateTimeFormatter.ofPattern(
+            "yyyy-MM-dd-H:mm");// e.g. 2017-09-23-24:00
 
     public Booking() {
         // For Jackson
     }
 
-    public Booking(boolean isRecurrent, String locationId, LocalDateTime startTime, int
+    public Booking(boolean isRecurrent, Location location, LocalDateTime startTime, int
             duration) {
+        this.id = UUID.randomUUID();
         this.isRecurrent = isRecurrent;
-        this.locationId = locationId;
+        this.location = location;
         this.startTime = startTime;
         this.duration = duration;
+    }
+
+
+    public Booking(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public boolean isRecurrent() {
@@ -41,12 +68,12 @@ public class Booking implements Serializable {
         isRecurrent = recurrent;
     }
 
-    public String getLocationId() {
-        return locationId;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setLocationId(String locationId) {
-        this.locationId = locationId;
+    public void setLocationId(Location location) {
+        this.location = location;
     }
 
     public LocalDateTime getStartTime() {
@@ -70,23 +97,21 @@ public class Booking implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Booking booking = (Booking) o;
-        return isRecurrent == booking.isRecurrent &&
-                duration == booking.duration &&
-                Objects.equals(locationId, booking.locationId) &&
-                Objects.equals(startTime, booking.startTime);
+        return Objects.equals(id, booking.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(isRecurrent, locationId, startTime, duration);
+        return id.hashCode();
     }
 
     @Override
     public String toString() {
         return "Booking {" +
+                "id=" + id +
                 "isRecurrent=" + isRecurrent +
-                ", locationId='" + locationId + '\'' +
-                ", startTime=" + formatter.format(startTime) +
+                ", location='" + location + '\'' +
+                ", startTime=" + API_URL_FORMATTER.format(startTime) +
                 ", duration=" + duration +
                 "}";
     }
