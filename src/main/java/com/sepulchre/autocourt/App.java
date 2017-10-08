@@ -70,6 +70,7 @@ public class App {
             logger.info("Live mode is not enabled. Bookings will not be confirmed.");
         }
 
+        isHeroku = true;
         // Load Chrome driver
         if (isHeroku) {
             System.setProperty("webdriver.chrome.driver", "/app/.chromedriver/bin/chromedriver");
