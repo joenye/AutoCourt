@@ -38,6 +38,7 @@ public class App {
 
     private static boolean isLiveMode = false;
     private static boolean isHeadless = false;
+    private static boolean isHeroku = false;
 
     public static void main(String[] args) throws IOException, InterruptedException, NoSuchFieldException {
         setup(args);
@@ -54,10 +55,13 @@ public class App {
         prop.load(input);
         input.close();
         saveFilePath = prop.getProperty("SAVE_FILE_PATH");
+        isHeroku = Boolean.parseBoolean(prop.getProperty("HEROKU"));
 
         if (args.length > 0) {
             isLiveMode = (Objects.equals(args[0].toLowerCase(), "--live"));
-            isHeadless = (Objects.equals(args[1].toLowerCase(), "--headless"));
+            if (args.length > 1) {
+                isHeadless = (Objects.equals(args[1].toLowerCase(), "--headless"));
+            }
         }
         if (isLiveMode) {
             logger.warn("CAUTION: Live mode is enabled. Bookings will be confirmed and " +
@@ -67,15 +71,24 @@ public class App {
         }
 
         // Load Chrome driver
-        ChromeDriverManager.getInstance().setup();
-        ChromeOptions chromeOptions = new ChromeOptions();
-        if (isHeadless) {
-            chromeOptions.addArguments("--headless");
-            logger.warn("Chrome headless mode is enabled.");
+        if (isHeroku) {
+            System.setProperty("webdriver.chrome.driver", "/app/.chromedriver/bin/chromedriver");
+            ChromeOptions options = new ChromeOptions();
+            options.addArguments("--disable-gpu");
+            options.addArguments("--no-sandbox");
+            options.setBinary("/app/.apt/usr/bin/google-chrome");
+            driver = new ChromeDriver(options);
         } else {
-            logger.info("Chrome headless mode is NOT enabled.");
+            ChromeDriverManager.getInstance().setup();
+            ChromeOptions options = new ChromeOptions();
+            if (isHeadless) {
+                options.addArguments("--headless");
+                logger.warn("Chrome headless mode is enabled.");
+            } else {
+                logger.info("Chrome headless mode is NOT enabled.");
+            }
+            driver = new ChromeDriver(options);
         }
-        driver = new ChromeDriver(chromeOptions);
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 
         // Configure HTTP endpoints

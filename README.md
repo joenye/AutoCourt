@@ -15,6 +15,18 @@ Optional parameters:
 
 For example, `java -jar target/AutoCourt-1.0.jar --headless`
 
+## Deploying to Heroku
+
+1. Ensure you are using buildpacks: 
+
+`heroku buildpacks:add --index 1 https://github.com/heroku/heroku-buildpack-chromedriver`
+
+`heroku buildpacks:add --index 2 https://github.com/heroku/heroku-buildpack-google-chrome`
+
+2. Deploy
+
+`mvn clean heroku:deploy`
+
 ## TODO 
 
 In priority order:

@@ -19,7 +19,7 @@
                 <version>1.2.0</version>
                 <configuration>
                     <processTypes>
-                        <web>java -jar ./target/AutoCourt-1.0.jar --live --headless</web>
+                        <web>java -jar ./target/AutoCourt-1.0.jar --live</web>
                     </processTypes>
                 </configuration>
             </plugin>
