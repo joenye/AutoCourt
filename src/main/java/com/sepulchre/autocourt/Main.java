@@ -1,5 +1,6 @@
 package com.sepulchre.autocourt;
 
+import com.sepulchre.autocourt.api.API;
 import com.sepulchre.autocourt.model.Booking;
 import com.sepulchre.autocourt.utils.FileUtils;
 import io.github.bonigarcia.wdm.ChromeDriverManager;
@@ -26,8 +27,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static spark.Spark.get;
-
 public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -36,25 +35,22 @@ public class Main {
     private static WebDriver driver;
     private static Map<Booking, ScheduledFuture> activeBookings = new HashMap<>();
     private static String saveFilePath;
+
     private static boolean liveMode = false;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException, NoSuchFieldException {
         setup(args);
 
         // Only log in at process start
         login();
-
-        // Add test booking
-        LocalDateTime time = LocalDateTime.parse("2017-09-25 07:00", Booking.formatter);
-        Booking booking = new Booking(false, "3473", time, 1);
-        addBooking(booking);
     }
 
 
-    private static void setup(String[] args) throws IOException {
+    private static void setup(String[] args) throws IOException, NoSuchFieldException {
         // Load Chrome driver
         ChromeDriverManager.getInstance().setup();
         driver = new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 
         // Load properties
         InputStream input = new FileInputStream("config/application.properties");
@@ -63,24 +59,19 @@ public class Main {
         input.close();
 
         if (args.length > 0) {
-            logger.warn("CAUTION: Live mode is enabled. Bookings will be confirmed and " +
-                    "real money shall be spent.");
             liveMode = (Objects.equals(args[0].toLowerCase(), "--live"));
         }
         if (!liveMode) {
             logger.info("Live mode is not enabled. Bookings will not be confirmed.");
+        } else {
+            logger.warn("CAUTION: Live mode is enabled. Bookings will be confirmed and " +
+                    "real money shall be spent.");
         }
+
         saveFilePath = prop.getProperty("SAVE_FILE_PATH");
 
-
         // Configure HTTP endpoints
-        LocalDateTime time = LocalDateTime.parse("2017-09-25 07:00", Booking.formatter);
-        Booking exampleBooking = new Booking(false, "3473", time, 1);
-        get("/add", (req, res) -> {
-            addBooking(exampleBooking);
-            return "Added booking";
-        });
-
+        API.createEndPoints();
 
         // Load active bookings
         List<Booking> bookings = FileUtils.loadBookingsFromFile(saveFilePath);
@@ -91,70 +82,81 @@ public class Main {
         }
     }
 
-    private static void addBooking(Booking booking) {
-        //TODO: return error to client when handling duplicate bookings
+    public static void addBooking(Booking booking) {
         if (!activeBookings.containsKey(booking)) {
             LocalDateTime schedulingTime = booking.getStartTime().minusDays(7).toLocalDate()
                     .atStartOfDay();
 
-            Runnable task = () -> bookCourt(booking);
+            Runnable task = () -> {
+                try {
+                    bookCourt(booking);
+                } catch (InterruptedException e) {
+                    logger.warn("Failed to book court for booking: " + booking.toString());
+                    e.printStackTrace();
+                }
+            };
+
             ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
 
             logger.info("New booking added to active bookings: " + booking.toString());
-            if (LocalDateTime.now().until(schedulingTime.minusSeconds(0), ChronoUnit.SECONDS) < 0) {
-                logger.warn("This booking can already be made online. Booking" +
-                        " has not been added to scheduler.");
-                return;
-            }
+            // TODO: Uncomment.
+//            if (LocalDateTime.now().until(schedulingTime.minusSeconds(0), ChronoUnit.SECONDS) < 0) {
+//                logger.warn("This booking can already be made online. Booking" +
+//                        " has not been added to scheduler.");
+//                return;
+//            }
 
             ScheduledFuture bookingFuture = execService.schedule(task, LocalDateTime.now()
                     .until(schedulingTime.minusSeconds(0), ChronoUnit.SECONDS), TimeUnit
                     .SECONDS);
             activeBookings.put(booking, bookingFuture);
             logger.info(booking.toString() + " has been scheduled to run at " + Booking
-                    .long_formatter
+                    .API_URL_FORMATTER
                     .format(schedulingTime.plusSeconds(1)));
-            FileUtils.saveBookingsToFile(activeBookings, saveFilePath);
+            FileUtils.saveBookingsToFile(new ArrayList<>(activeBookings.keySet()), saveFilePath);
         }
     }
 
-    private static void cancelBooking(Booking booking) {
-        ScheduledFuture future = activeBookings.get(booking);
-        future.cancel(true);
-        activeBookings.remove(booking);
-        if (activeBookings.size() > 0)
-            FileUtils.saveBookingsToFile(activeBookings, saveFilePath);
+    public static List<Booking> getBookings() {
+        return new ArrayList<>(activeBookings.keySet());
     }
 
-    private static void login() {
+    public static void cancelBooking(UUID booking_id) {
+        ScheduledFuture future = activeBookings.get(new Booking(booking_id));
+        future.cancel(true);
+        activeBookings.remove(new Booking(booking_id));
+        FileUtils.saveBookingsToFile(new ArrayList<>(activeBookings.keySet()), saveFilePath);
+    }
+
+    private static void login() throws InterruptedException {
         driver.get("https://www.openplay.co.uk/booking/place/3473/login");
 
         WebDriverWait wait = new WebDriverWait(driver, 40);
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector
                 ("a[href='#login']"))).click();
+        Thread.sleep(1000);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("loginEmail")))
                 .sendKeys(prop.getProperty("USERNAME"));
         wait.until(ExpectedConditions.elementToBeClickable(By.id("loginPassword")))
                 .sendKeys(prop.getProperty("PASSWORD"));
+        Thread.sleep(2000);
         wait.until(ExpectedConditions.elementToBeClickable(By.id
                 ("loginBtn"))).submit();
     }
 
-    private static void bookCourt(Booking booking) {
+    private static void bookCourt(Booking booking) throws InterruptedException {
         logger.info("Attempting to book court for " + booking.getDuration() + " hour" +
-                "(s) from " +
-                " " +
-                Booking.formatter.format(booking.getStartTime()));
+                "(s) from " + Booking.API_URL_FORMATTER.format(booking.getStartTime()));
 
         activeBookings.remove(booking);
         if (activeBookings.size() > 0)
-            FileUtils.saveBookingsToFile(activeBookings, saveFilePath);
+            FileUtils.saveBookingsToFile(new ArrayList<>(activeBookings.keySet()), saveFilePath);
 
         String URL = "https://www.openplay.co" +
-                ".uk/booking/place/" + booking.getLocationId() +
+                ".uk/booking/place/" + booking.getLocation().id +
                 "/pricing?start=" + String.format("%02d", booking.getStartTime().getHour()) +
                 ":00&end=" + String.format("%02d", booking.getStartTime().getHour() + booking.getDuration()) +
-                ":00&date=" + Booking.url_formatter.format(booking.getStartTime()) +
+                ":00&date=" + Booking.CLISSOLD_URL_FORMATTER.format(booking.getStartTime()) +
                 "&resource_id=2571&use_id=42";
 
         /* Keep refreshing until booking is ready */
@@ -170,23 +172,28 @@ public class Main {
                     ("a[href='/booking/place/3473/login']"));
         };
 
+        Thread.sleep(1000);
         FluentWait<WebDriver> wait = new FluentWait<>(driver);
-        wait.pollingEvery(1000, TimeUnit.MILLISECONDS);
+        wait.pollingEvery(5000, TimeUnit.MILLISECONDS);
         wait.withTimeout(60 * 3, TimeUnit.SECONDS);
         wait.ignoring(NoSuchElementException.class);
         wait.until(function);
         driver.findElement(By.cssSelector("a[href='/booking/place/3473/login']")).click();
 
+        Thread.sleep(1000);
         driver.findElement(By.id("confirm-checkbox")).click();
 
-        /* CAUTION: Only uncomment when ready */
-        // TODO: Check order before confirming
         if (liveMode) {
             logger.info("Confirming order...");
+            Thread.sleep(1000);
             driver.findElement(By.id("complete-order")).click();
         } else {
-            logger.info("Not confirming order as live mode is not enabled...");
+            logger.info("Not confirming order as live mode is not enabled.");
         }
+    }
+
+    public static boolean isLiveMode() {
+        return liveMode;
     }
 
 }
