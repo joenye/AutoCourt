@@ -1,7 +1,21 @@
 # AutoCourt
-Tennis court booking system
+Automatic tennis court booking system for Hackney Tennis Courts.
 
-# TODO 
+![Screenshot](screenshot.png "Optional Title")
+
+## Running
+
+1. Build with `maven bundle`
+2. Execute with `java -jar target/AutoCourt-1.0.jar`
+
+Optional parameters:
+
+* Enable live mode (bookings will be confirmed): `--livemode`
+* Enable Chrome headless mode: `--headless`
+
+For example, `java -jar target/AutoCourt-1.0.jar --headless`
+
+## TODO 
 
 In priority order:
 
@@ -10,4 +24,4 @@ In priority order:
 2. ~~Front-end!~~
 3. Duration: recurrent bookings ~~and 2+ hours~~
 4. ~~Different location IDs (Clissold Park and Aske Gardens)~~
-5. Build/deployment configured
+5. ~~Build/deployment configured~~
