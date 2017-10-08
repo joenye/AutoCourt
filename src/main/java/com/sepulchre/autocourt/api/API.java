@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.sepulchre.autocourt.Main.*;
+import static com.sepulchre.autocourt.App.*;
 import static spark.Spark.*;
 
 

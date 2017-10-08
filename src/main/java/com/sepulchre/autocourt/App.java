@@ -27,9 +27,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-public class Main {
+public class App {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     private static Properties prop;
     private static WebDriver driver;
@@ -48,32 +48,35 @@ public class Main {
 
 
     private static void setup(String[] args) throws IOException, NoSuchFieldException {
-        // Load Chrome driver
-        ChromeDriverManager.getInstance().setup();
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless");
-        driver = new ChromeDriver(chromeOptions);
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-
         // Load properties
-        InputStream input = Main.class.getResourceAsStream("/config/application.properties");
-
+        InputStream input = App.class.getResourceAsStream("/config/application.properties");
         prop = new Properties();
         prop.load(input);
         input.close();
+        saveFilePath = prop.getProperty("SAVE_FILE_PATH");
 
         if (args.length > 0) {
             isLiveMode = (Objects.equals(args[0].toLowerCase(), "--live"));
             isHeadless = (Objects.equals(args[1].toLowerCase(), "--headless"));
         }
-        if (!isLiveMode) {
-            logger.info("Live mode is not enabled. Bookings will not be confirmed.");
-        } else {
+        if (isLiveMode) {
             logger.warn("CAUTION: Live mode is enabled. Bookings will be confirmed and " +
                     "real money shall be spent.");
+        } else {
+            logger.info("Live mode is not enabled. Bookings will not be confirmed.");
         }
 
-        saveFilePath = prop.getProperty("SAVE_FILE_PATH");
+        // Load Chrome driver
+        ChromeDriverManager.getInstance().setup();
+        ChromeOptions chromeOptions = new ChromeOptions();
+        if (isHeadless) {
+            chromeOptions.addArguments("--headless");
+            logger.warn("Chrome headless mode is enabled.");
+        } else {
+            logger.info("Chrome headless mode is NOT enabled.");
+        }
+        driver = new ChromeDriver(chromeOptions);
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 
         // Configure HTTP endpoints
         API.createEndPoints();
