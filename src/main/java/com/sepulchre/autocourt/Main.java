@@ -9,13 +9,13 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -36,7 +36,8 @@ public class Main {
     private static Map<Booking, ScheduledFuture> activeBookings = new HashMap<>();
     private static String saveFilePath;
 
-    private static boolean liveMode = false;
+    private static boolean isLiveMode = false;
+    private static boolean isHeadless = false;
 
     public static void main(String[] args) throws IOException, InterruptedException, NoSuchFieldException {
         setup(args);
@@ -49,19 +50,23 @@ public class Main {
     private static void setup(String[] args) throws IOException, NoSuchFieldException {
         // Load Chrome driver
         ChromeDriverManager.getInstance().setup();
-        driver = new ChromeDriver();
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--headless");
+        driver = new ChromeDriver(chromeOptions);
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 
         // Load properties
-        InputStream input = new FileInputStream("config/application.properties");
+        InputStream input = Main.class.getResourceAsStream("/config/application.properties");
+
         prop = new Properties();
         prop.load(input);
         input.close();
 
         if (args.length > 0) {
-            liveMode = (Objects.equals(args[0].toLowerCase(), "--live"));
+            isLiveMode = (Objects.equals(args[0].toLowerCase(), "--live"));
+            isHeadless = (Objects.equals(args[1].toLowerCase(), "--headless"));
         }
-        if (!liveMode) {
+        if (!isLiveMode) {
             logger.info("Live mode is not enabled. Bookings will not be confirmed.");
         } else {
             logger.warn("CAUTION: Live mode is enabled. Bookings will be confirmed and " +
@@ -99,7 +104,6 @@ public class Main {
             ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
 
             logger.info("New booking added to active bookings: " + booking.toString());
-            // TODO: Uncomment.
 //            if (LocalDateTime.now().until(schedulingTime.minusSeconds(0), ChronoUnit.SECONDS) < 0) {
 //                logger.warn("This booking can already be made online. Booking" +
 //                        " has not been added to scheduler.");
@@ -117,8 +121,14 @@ public class Main {
         }
     }
 
+    public static boolean isLiveMode() {
+        return isLiveMode;
+    }
+
     public static List<Booking> getBookings() {
-        return new ArrayList<>(activeBookings.keySet());
+        List<Booking> bookings = new ArrayList<>(activeBookings.keySet());
+        bookings.sort(Comparator.comparing(Booking::getStartTime));
+        return bookings;
     }
 
     public static void cancelBooking(UUID booking_id) {
@@ -183,17 +193,13 @@ public class Main {
         Thread.sleep(1000);
         driver.findElement(By.id("confirm-checkbox")).click();
 
-        if (liveMode) {
+        if (isLiveMode) {
             logger.info("Confirming order...");
             Thread.sleep(1000);
             driver.findElement(By.id("complete-order")).click();
         } else {
             logger.info("Not confirming order as live mode is not enabled.");
         }
-    }
-
-    public static boolean isLiveMode() {
-        return liveMode;
     }
 
 }

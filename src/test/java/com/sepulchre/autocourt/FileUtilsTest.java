@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -23,7 +22,7 @@ public class FileUtilsTest {
     @Before
     public void before() throws IOException {
         // Load properties
-        InputStream input = new FileInputStream("config/application-test.properties");
+        InputStream input = FileUtilsTest.class.getResourceAsStream("/config/application-test.properties");
         Properties prop = new Properties();
         prop.load(input);
         input.close();
