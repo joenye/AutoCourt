@@ -52,17 +52,17 @@
 
     <table class="table table-bordered table-responsive">
       <tr>
-        <th>Booking ID</th>
-        <th>Location</th>
+        <th>ID</th>
         <th>Start Time</th>
         <th>Duration</th>
+        <th>Location</th>
         <th>Action</th>
       </tr>
       <tr th:each="booking : ${bookings}">
         <td th:text="${booking.id}"></td>
-        <td th:text="${booking.location}"></td>
         <td th:text="${#temporals.format(booking.startTime, 'EEEE dd MMM yyyy HH:mm')}"></td>
         <td th:text="${booking.duration}"></td>
+        <td th:text="${booking.location}"></td>
         <td>
           <form action="#" th:action="@{~/bookings/delete/{id}(id=${booking.id})}" method="get">
             <button type="submit" class="btn btn-danger">Delete</button>
@@ -116,7 +116,7 @@
                 <input class="form-control" placeholder="e.g. 01, 12" type="text" id="hour-input" name="hour-input"/>
               </div>
               <div class="form-group">
-                <label for="duration-input">Duration (1-X)</label>
+                <label for="duration-input">Duration (1-23)</label>
                 <input class="form-control" placeholder="e.g. 1, 3" type="text" id="duration-input" name="duration-input"/>
               </div>
               <div class="modal-footer">
