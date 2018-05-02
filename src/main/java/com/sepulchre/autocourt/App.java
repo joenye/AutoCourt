@@ -56,7 +56,6 @@ public class App {
         prop.load(input);
         input.close();
         saveFilePath = prop.getProperty("SAVE_FILE_PATH");
-        isHeroku = Boolean.parseBoolean(prop.getProperty("HEROKU"));
 
         if (args.length > 0) {
             isLiveMode = (Objects.equals(args[0].toLowerCase(), "--live"));
@@ -71,7 +70,6 @@ public class App {
             logger.info("Live mode is not enabled. Bookings will not be confirmed.");
         }
 
-        isHeroku = true;
         // Load Chrome driver
         // ChromeDriverManager.getInstance().setup();
         ChromeOptions options = new ChromeOptions();
