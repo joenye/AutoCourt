@@ -1,0 +1,26 @@
+# To execute this docker-compose yml file use docker-compose -f <file_name> up
+# Add the "-d" flag at the end for deattached execution
+version: "3"
+
+services:
+    selenium-standalone-chrome:
+      image: selenium/standalone-chrome:3.11.0-dysprosium
+      ports:
+        - 4444:4444
+      network_mode: host
+    # chrome-headless:
+    #   image: yukinying/chrome-headless:63.0.3230.2
+    #   ports: 
+    #     - 9222:9222
+      
+    autocourt:
+      build:
+        context: ./
+        dockerfile: Dockerfile
+      image: autocourt
+      restart: always
+      network_mode: host
+      ports: 
+        - 4567:4567
+      volumes:
+        - ./:/usr/src/autocourt

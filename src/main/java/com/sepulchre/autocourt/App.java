@@ -3,10 +3,11 @@ package com.sepulchre.autocourt;
 import com.sepulchre.autocourt.api.API;
 import com.sepulchre.autocourt.model.Booking;
 import com.sepulchre.autocourt.utils.FileUtils;
-import io.github.bonigarcia.wdm.ChromeDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -26,19 +27,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.net.URL;
 
 public class App {
 
     private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     private static Properties prop;
-    private static WebDriver driver;
+    private static RemoteWebDriver driver;
     private static Map<Booking, ScheduledFuture> activeBookings = new HashMap<>();
     private static String saveFilePath;
 
     private static boolean isLiveMode = false;
-    private static boolean isHeadless = false;
-    private static boolean isHeroku = false;
+    private static boolean isHeadless = true;
 
     public static void main(String[] args) throws IOException, InterruptedException, NoSuchFieldException {
         setup(args);
@@ -72,25 +73,22 @@ public class App {
 
         isHeroku = true;
         // Load Chrome driver
-        if (isHeroku) {
-            System.setProperty("webdriver.chrome.driver", "/app/.chromedriver/bin/chromedriver");
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--disable-gpu");
-            options.addArguments("--no-sandbox");
-            options.setBinary("/app/.apt/usr/bin/google-chrome");
-            driver = new ChromeDriver(options);
-        } else {
-            ChromeDriverManager.getInstance().setup();
-            ChromeOptions options = new ChromeOptions();
-            if (isHeadless) {
-                options.addArguments("--headless");
-                logger.warn("Chrome headless mode is enabled.");
-            } else {
-                logger.info("Chrome headless mode is NOT enabled.");
-            }
-            driver = new ChromeDriver(options);
-        }
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        // ChromeDriverManager.getInstance().setup();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--remote-debugin-port=9222");
+        options.addArguments("--screen-size=1200x800");
+        
+        // if (isHeadless) {
+        //     options.addArguments("--headless");
+        //     logger.warn("Chrome headless mode is enabled.");
+        // } else {
+        //     logger.info("Chrome headless mode is NOT enabled.");
+        // }
+
+        driver = new RemoteWebDriver(new URL("http://0.0.0.0:4444/wd/hub"), options);
 
         // Configure HTTP endpoints
         API.createEndPoints();
