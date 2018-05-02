@@ -1,13 +1,13 @@
-FROM java:8 
-
-# Create directory
-RUN mkdir -p /usr/src/autocourt
-WORKDIR /usr/src/autocourt
+FROM armv7/armhf-java8
 
 # Install maven
 RUN apt-get update
 RUN apt-get install -y maven
 RUN apt-get install -y -f
+
+# Create directory
+RUN mkdir -p /usr/src/autocourt
+WORKDIR /usr/src/autocourt
 
 # # Install ChromeDriver
 # ARG driver_url
