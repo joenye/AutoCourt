@@ -14,9 +14,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.heroku.sdk</groupId>
-                <artifactId>heroku-maven-plugin</artifactId>
-                <version>1.2.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
                 <configuration>
                     <processTypes>
                         <web>java -jar ./target/AutoCourt-1.0.jar --live</web>
@@ -68,12 +68,7 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.5.3</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>1.7.2</version>
+            <version>3.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
