@@ -11,6 +11,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -34,7 +35,7 @@ public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     private static Properties prop;
-    private static RemoteWebDriver driver;
+    private static WebDriver driver;
     private static Map<Booking, ScheduledFuture> activeBookings = new HashMap<>();
     private static String saveFilePath;
 
@@ -70,14 +71,22 @@ public class App {
             logger.info("Live mode is not enabled. Bookings will not be confirmed.");
         }
 
-        // Load Chrome driver
-        // ChromeDriverManager.getInstance().setup();
-        ChromeOptions options = new ChromeOptions();
+	logger.info("Connecting to driver... (restart driver if this hangs)");
+
+	ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--remote-debugin-port=9222");
-        options.addArguments("--screen-size=1200x800");
+        // options.addArguments("--disable-gpu");
+        // options.addArguments("--remote-debugin-port=9222");
+        // options.addArguments("--screen-size=1200x800");
+	
+	//DesiredCapabilities cap = DesiredCapabilities.chrome();
+	//FirefoxOptions options = new FirefoxOptions();
+	//DesiredCapabilities dc = new DesiredCapabilities();
+	//dc.setBrowserName(DesiredCapabilities.firefox().getBrowserName());
+	
+	//cap.setCapability(FirefoxOptions.CAPABILITY, chromeOptions);
+	driver = new RemoteWebDriver(new URL("http://172.18.0.1:4444/wd/hub"), options);
         
         // if (isHeadless) {
         //     options.addArguments("--headless");
@@ -86,10 +95,10 @@ public class App {
         //     logger.info("Chrome headless mode is NOT enabled.");
         // }
 
-        driver = new RemoteWebDriver(new URL("http://0.0.0.0:4444/wd/hub"), options);
-
         // Configure HTTP endpoints
         API.createEndPoints();
+
+	logger.info("Created endpoints");
 
         // Load active bookings
         List<Booking> bookings = FileUtils.loadBookingsFromFile(saveFilePath);
@@ -97,6 +106,7 @@ public class App {
             for (Booking b : bookings) {
                 addBooking(b);
             }
+	    logger.info("Loaded bookings");
         }
     }
 
@@ -165,15 +175,16 @@ public class App {
         Thread.sleep(2000);
         wait.until(ExpectedConditions.elementToBeClickable(By.id
                 ("loginBtn"))).submit();
+	logger.info("Logged in successfully");
     }
 
     private static void bookCourt(Booking booking) throws InterruptedException {
-        logger.info("Attempting to book court for " + booking.getDuration() + " hour" +
-                "(s) from " + Booking.API_URL_FORMATTER.format(booking.getStartTime()));
-
         activeBookings.remove(booking);
         if (activeBookings.size() > 0)
             FileUtils.saveBookingsToFile(new ArrayList<>(activeBookings.keySet()), saveFilePath);
+
+        logger.info("Attempting to book court for " + booking.getDuration() + " hour" +
+                "(s) from " + Booking.API_URL_FORMATTER.format(booking.getStartTime()));
 
         String URL = "https://www.openplay.co" +
                 ".uk/booking/place/" + booking.getLocation().id +

@@ -14,16 +14,16 @@ WORKDIR /usr/src/autocourt
 # RUN wget ${driver_url} -O chromedriver.deb
 # RUN dpkg -i chromedriver.deb
 
-# Prepare by downloading dependencies
-ADD pom.xml pom.xml
-RUN ["mvn", "dependency:resolve"]
-RUN ["mvn", "verify"]
-
 # Adding source, compile and package into a fat jar
 ADD src src
 ADD data data
 
-RUN ["mvn", "package"]
+# Prepare by downloading dependencies
+ADD pom.xml pom.xml
 
-EXPOSE 4567 9222
-CMD ["/usr/lib/jvm/java-8-openjdk-amd64/bin/java", "-jar", "target/AutoCourt-1.0.jar"]
+RUN mvn package -DskipTests
+
+EXPOSE 4567 9222 4444
+
+RUN ls target/
+CMD java -jar target/AutoCourt-1.0.jar

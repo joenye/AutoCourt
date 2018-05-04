@@ -17,17 +17,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>com.sepulchre.autocourt.App</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.1.0</version>
         <executions>
@@ -41,7 +30,6 @@
                 <transformer>
                   <manifestEntries>
                     <Main-Class>com.sepulchre.autocourt.App</Main-Class>
-                    <Build-Number>1.0</Build-Number>
                   </manifestEntries>
                 </transformer>
               </transformers>

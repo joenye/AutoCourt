@@ -18,6 +18,8 @@ public class FileUtils {
     public static void saveBookingsToFile(List<Booking> bookings,
                                           String filePath) {
         // Delete existing file
+	logger.info("Directory below:");
+	logger.info(System.getProperty("user.dir"));
 	File file = new File(filePath);
 	file.mkdirs();
 	file.delete();
@@ -36,7 +38,7 @@ public class FileUtils {
     }
 
     public static List<Booking> loadBookingsFromFile(String filePath) {
-
+	logger.info(System.getProperty("user.dir"));
         File file = new File(filePath);
         if (file.exists()) {
             ObjectMapper mapper = new ObjectMapper();
