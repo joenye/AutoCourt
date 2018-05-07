@@ -1,0 +1,32 @@
+06-05-2018 18:47:00 INFO  FileUtils:29 - Wrote 2 bookings to save file: [Booking {id=621c2ae5-059d-4420-87bf-5f0bc5621d04isRecurrent=true, location='ASKE_GARDENS', startTime=2018-05-06-18:46, duration=1}, Booking {id=2df409f8-89a3-49d4-8238-362148b8f0edisRecurrent=false, location='ASKE_GARDENS', startTime=2018-05-07-18:46, duration=2}]
+06-05-2018 18:47:00 INFO  FileUtils:38 - /home/joenye/Projects/AutoCourt
+06-05-2018 18:47:00 INFO  FileUtils:51 - Loaded 2 bookings from save file: [Booking {id=621c2ae5-059d-4420-87bf-5f0bc5621d04isRecurrent=true, location='ASKE_GARDENS', startTime=2018-05-06-18:46, duration=1}, Booking {id=2df409f8-89a3-49d4-8238-362148b8f0edisRecurrent=false, location='ASKE_GARDENS', startTime=2018-05-07-18:46, duration=2}]
+06-05-2018 17:47:13 INFO  App:71 - Live mode is not enabled. Bookings will not be confirmed.
+06-05-2018 17:47:13 INFO  App:74 - Connecting to driver... (restart driver if this hangs)
+06-05-2018 17:47:14 INFO  StaticFilesConfiguration:142 - StaticResourceHandler configured with folder = /public
+06-05-2018 17:47:14 INFO  App:101 - Created endpoints
+06-05-2018 17:47:14 INFO  FileUtils:38 - /usr/src/autocourt
+06-05-2018 17:47:14 INFO  App:165 - Attempting to login...
+06-05-2018 17:47:14 INFO  log:192 - Logging initialized @1746ms to org.eclipse.jetty.util.log.Slf4jLog
+06-05-2018 17:47:14 INFO  EmbeddedJettyServer:127 - == Spark has ignited ...
+06-05-2018 17:47:14 INFO  EmbeddedJettyServer:128 - >> Listening on 0.0.0.0:4567
+06-05-2018 17:47:14 INFO  Server:372 - jetty-9.4.z-SNAPSHOT
+06-05-2018 17:47:14 INFO  session:364 - DefaultSessionIdManager workerName=node0
+06-05-2018 17:47:14 INFO  session:369 - No SessionScavenger set, using defaults
+06-05-2018 17:47:14 INFO  session:149 - Scavenging every 600000ms
+06-05-2018 17:47:15 INFO  AbstractConnector:280 - Started ServerConnector@3691b0fd{HTTP/1.1,[http/1.1]}{0.0.0.0:4567}
+06-05-2018 17:47:15 INFO  Server:444 - Started @1916ms
+06-05-2018 17:47:20 INFO  API:52 - Fetched bookings
+06-05-2018 17:47:21 INFO  App:181 - Logged in successfully
+06-05-2018 17:48:45 INFO  App:129 - New booking added to active bookings: Booking {id=ec48a62e-43d8-49cd-b001-b7a7de2c2cbbisRecurrent=false, location='CLISSOLD_PARK', startTime=2018-05-09-12:00, duration=1}
+06-05-2018 17:48:45 INFO  App:140 - Booking {id=ec48a62e-43d8-49cd-b001-b7a7de2c2cbbisRecurrent=false, location='CLISSOLD_PARK', startTime=2018-05-09-12:00, duration=1} has been scheduled to run at 2018-05-02-0:00
+06-05-2018 17:48:45 INFO  App:189 - Attempting to book court for 1 hour(s) from 2018-05-09-12:00
+06-05-2018 17:48:45 INFO  App:199 - Generated booking URL: https://www.openplay.co.uk/booking/place/3473/pricing?start=12:00&end=13:00&date=2018-05-09&resource_id=2571&use_id=42
+06-05-2018 17:48:45 INFO  FileUtils:29 - Wrote 0 bookings to save file: []
+06-05-2018 17:48:45 INFO  API:52 - Fetched bookings
+06-05-2018 17:48:47 INFO  App:206 - Refreshing until booking is visible... (URL: https://www.openplay.co.uk/booking/place/3473/pricing?start=12:00&end=13:00&date=2018-05-09&resource_id=2571&use_id=42)
+06-05-2018 17:48:48 INFO  App:212 - Clicked pricing option button... (URL: https://www.openplay.co.uk/booking/place/3473/cart)
+06-05-2018 17:48:49 INFO  App:227 - Selected booking...
+06-05-2018 17:48:50 INFO  App:232 - Entered confirmation screen
+06-05-2018 17:48:50 INFO  App:239 - Not confirming order as live mode is not enabled.
+06-05-2018 17:49:09 INFO  API:52 - Fetched bookings

@@ -162,6 +162,8 @@ public class App {
     }
 
     private static void login() throws InterruptedException {
+	logger.info("Attempting to login...");
+
         driver.get("https://www.openplay.co.uk/booking/place/3473/login");
 
         WebDriverWait wait = new WebDriverWait(driver, 40);
@@ -175,6 +177,7 @@ public class App {
         Thread.sleep(2000);
         wait.until(ExpectedConditions.elementToBeClickable(By.id
                 ("loginBtn"))).submit();
+
 	logger.info("Logged in successfully");
     }
 
@@ -193,14 +196,21 @@ public class App {
                 ":00&date=" + Booking.CLISSOLD_URL_FORMATTER.format(booking.getStartTime()) +
                 "&resource_id=2571&use_id=42";
 
+	logger.info("Generated booking URL: " + URL);
+
         /* Keep refreshing until booking is ready */
         Function<WebDriver, WebElement> function = driver -> {
             // 1. Refresh page
             driver.get(URL);
 
-            FluentWait<WebDriver> wait = new FluentWait<>(driver);
+	    logger.info("Refreshing until booking is visible... (URL: " + driver.getCurrentUrl() + ")");
+
             // 2. Click "Standard £0.00" button
+            FluentWait<WebDriver> wait = new FluentWait<>(driver);
             wait.until(ExpectedConditions.elementToBeClickable(By.id("pricingOption"))).click();
+
+	    logger.info("Clicked pricing option button... (URL: " + driver.getCurrentUrl() + ")");
+
             // 3. Check if next button exists
             return driver.findElement(By.cssSelector
                     ("a[href='/booking/place/3473/login']"));
@@ -214,8 +224,12 @@ public class App {
         wait.until(function);
         driver.findElement(By.cssSelector("a[href='/booking/place/3473/login']")).click();
 
+	logger.info("Selected booking...");
+
         Thread.sleep(1000);
         driver.findElement(By.id("confirm-checkbox")).click();
+
+	logger.info("Entered confirmation screen");
 
         if (isLiveMode) {
             logger.info("Confirming order...");

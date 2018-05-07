@@ -3,7 +3,7 @@
 version: "3"
 
 services:
-    selenium-standalone-chrome:
+    standalone-chrome:
       image: selenium/standalone-chrome:3.11.0-dysprosium
       ports:
         - 4444:4444
@@ -16,9 +16,11 @@ services:
     autocourt:
       build:
         context: ./
-        dockerfile: Dockerfile
+        dockerfile: Dockerfile-desktop
       image: autocourt
       restart: always
+      depends_on:
+        - standalone-chrome
       network_mode: host
       ports: 
         - 4567:4567

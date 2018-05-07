@@ -17,9 +17,6 @@ public class FileUtils {
 
     public static void saveBookingsToFile(List<Booking> bookings,
                                           String filePath) {
-        // Delete existing file
-	logger.info("Directory below:");
-	logger.info(System.getProperty("user.dir"));
 	File file = new File(filePath);
 	file.mkdirs();
 	file.delete();
